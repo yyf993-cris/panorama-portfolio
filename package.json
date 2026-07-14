@@ -7,8 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "sync-assets": "bash scripts/sync-assets.sh",
-    "prebuild": "bash scripts/sync-assets.sh"
+    "sync-assets": "node scripts/sync-assets.mjs",
+    "sync-assets:bash": "bash scripts/sync-assets.sh",
+    "prebuild": "node scripts/sync-assets.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
