@@ -20,12 +20,8 @@
 ### 1. 获取项目
 
 ```bash
-# 方式一：从 Git 仓库克隆
-git clone <你的仓库地址> panorama-portfolio
-cd panorama-portfolio
-
-# 方式二：直接复制项目目录
-cp -r /path/to/panorama-portfolio ./panorama-portfolio
+# 从 GitHub 仓库克隆
+git clone https://github.com/yyf993-cris/panorama-portfolio.git
 cd panorama-portfolio
 ```
 
@@ -103,22 +99,47 @@ cat .server.log
 
 ---
 
-## 部署到云服务器（可选）
+## 外网访问
 
-如果需要让外网可以访问：
+### 方式一：Vercel 部署（推荐，永久公网地址）
 
-### Vercel（推荐，免费）
+项目已配置 Vercel 自动部署。每次推送代码到 GitHub，Vercel 自动更新网站。
 
-1. 将项目推送到 GitHub
-2. 访问 https://vercel.com/new，导入仓库
-3. 点击 Deploy，等待完成
-4. 获得一个 `xxx.vercel.app` 域名
+- **GitHub 仓库**: https://github.com/yyf993-cris/panorama-portfolio
+- **公网地址**: https://panorama-portfolio.vercel.app
 
-### 自有服务器
+更新流程：
+```bash
+# 修改内容后，推送到 GitHub 即可自动部署
+git add -A && git commit -m "更新作品" && git push
+```
+
+Vercel 会在 1-2 分钟内完成自动部署。
+
+### 方式二：Cloudflare Tunnel（临时分享，无需注册）
+
+适合临时让他人预览本地开发的效果：
+
+```bash
+# 安装（仅首次）
+brew install cloudflared
+
+# 启动隧道（生成临时公网地址）
+cloudflared tunnel --url http://localhost:3000
+```
+
+会输出一个 `https://xxx.trycloudflare.com` 地址，发给对方即可访问。
+
+注意事项：
+- 需要保持电脑不休眠、网络不断开
+- 公司内网可能拦截，需切换到手机热点
+- 每次启动地址会变化
+
+### 方式三：自有服务器
 
 ```bash
 # 在服务器上
-git clone <仓库地址> /opt/panorama-portfolio
+git clone https://github.com/yyf993-cris/panorama-portfolio.git /opt/panorama-portfolio
 cd /opt/panorama-portfolio
 ./scripts/server.sh install
 PORT=80 ./scripts/server.sh start
@@ -158,3 +179,24 @@ npm run sync-assets
 ```bash
 ./scripts/server.sh dev
 ```
+
+**Q: Vercel 部署后无法访问（DNS 污染）**
+
+部分企业网络会拦截 `vercel.app` 域名，解决方法：
+
+macOS/Linux:
+```bash
+sudo sh -c 'echo "76.76.21.21 panorama-portfolio.vercel.app" >> /etc/hosts'
+```
+
+Windows（管理员权限运行）：
+```powershell
+echo 76.76.21.21 panorama-portfolio.vercel.app >> C:\Windows\System32\drivers\etc\hosts
+ipconfig /flushdns
+```
+
+或切换到手机热点 / 家庭网络访问。
+
+**Q: 构建时报 Google Fonts 错误**
+
+网络无法访问 Google 服务时会出现此问题。项目已移除 Google Fonts 依赖，使用系统字体，正常情况不会再出现。如遇到类似问题，确认网络连通性。

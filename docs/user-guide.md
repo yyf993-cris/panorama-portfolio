@@ -12,6 +12,8 @@
 4. [管理素材文件](#4-管理素材文件)
 5. [修改网站标题和描述](#5-修改网站标题和描述)
 6. [修改首页文案](#6-修改首页文案)
+7. [微信分享卡片配置](#7-微信分享卡片配置)
+8. [发布更新到线上](#8-发布更新到线上)
 
 ---
 
@@ -205,9 +207,9 @@ assets/
 
 ```ts
 export const siteConfig = {
-  title: "我的全景作品集",       // 浏览器标签页标题
-  description: "VR 全景摄影作品展示",  // SEO 描述
-  url: "https://your-domain.com",     // 网站正式域名
+  title: "全景作品集 | Your Name",              // 浏览器标签页标题 & 微信分享标题
+  description: "空间设计师 · VR全景摄影 | 用设计探索理想空间",  // SEO 描述 & 微信分享描述
+  url: "https://panorama-portfolio.vercel.app",  // 网站正式域名
 };
 ```
 
@@ -235,7 +237,59 @@ export const siteConfig = {
 
 ---
 
-## 完整更新流程示例
+## 7. 微信分享卡片配置
+
+将网站链接分享到微信时，会自动显示为带图文的卡片样式。
+
+### 卡片内容来源
+
+| 卡片元素 | 对应配置 |
+|---------|---------|
+| 标题 | `src/lib/config.ts` → `siteConfig.title` |
+| 描述 | `src/lib/config.ts` → `siteConfig.description` |
+| 封面图 | `public/og-image.jpg`（1200×630 像素） |
+
+### 更换分享封面图
+
+1. 准备一张 **1200×630** 像素的 JPG 图片
+2. 替换 `public/og-image.jpg`
+3. 推送更新：`git add -A && git commit -m "更新分享封面" && git push`
+
+### 分享效果预览
+
+```
+┌────────────────────────────────┐
+│ 全景作品集 | Your Name          │  ← siteConfig.title
+│ 空间设计师 · VR全景摄影 |        │  ← siteConfig.description
+│ 用设计探索理想空间              │
+│                     [封面图]    │  ← og-image.jpg
+└────────────────────────────────┘
+```
+
+### 注意事项
+
+- 微信有缓存，修改后可能需要等几小时才能看到新卡片
+- 可以用 [微信开放平台调试工具](https://mp.weixin.qq.com/) 清除缓存预览
+
+---
+
+## 8. 发布更新到线上
+
+项目已连接 GitHub + Vercel 自动部署。修改内容后只需：
+
+```bash
+# 1. 同步素材（如果有新图片）
+npm run sync-assets
+
+# 2. 提交并推送到 GitHub
+git add -A
+git commit -m "更新内容描述"
+git push
+```
+
+Vercel 会在 1-2 分钟内自动部署，线上地址 https://panorama-portfolio.vercel.app 自动更新。
+
+### 完整更新流程示例
 
 **场景：添加一个新的全景作品**
 
@@ -264,3 +318,4 @@ npm run sync-assets
 3. **修改代码文件后需重启** — 生产模式下修改不会自动生效
 4. **开发模式免重启** — 使用 `./scripts/server.sh dev` 可实时预览改动
 5. **素材放 assets/ 而非 public/** — public/works/ 由脚本自动管理，手动放入会被覆盖
+6. **线上更新** — 修改后执行 `git add -A && git commit -m "描述" && git push`，Vercel 自动部署
