@@ -5,9 +5,9 @@ import type { Profile } from "./types";
  * 如果不想硬编码，也可以从 Notion 单独一个页面读取
  */
 export const siteConfig = {
-  title: "我的全景作品集",
-  description: "VR 全景摄影作品展示",
-  url: "https://your-domain.com",
+  title: "全景作品集 | Your Name",
+  description: "空间设计师 · VR全景摄影 | 用设计探索理想空间",
+  url: "https://panorama-portfolio.vercel.app",
 };
 
 export const profile: Profile = {
