@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { profile } from "@/lib/config";
+import { getProfile } from "@/lib/config";
+import TotalViewsCounter from "./TotalViewsCounter";
 
 function SocialIcon({ icon }: { icon: string }): ReactNode {
   if (icon === "wechat") {
@@ -42,6 +43,7 @@ function StatItem({ label, value }: { label: string; value: number }) {
 }
 
 export default function ProfileCard({ worksCount }: { worksCount?: number }) {
+  const profile = getProfile();
   return (
     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
       <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-indigo-500/[0.07] blur-3xl" />
@@ -82,10 +84,9 @@ export default function ProfileCard({ worksCount }: { worksCount?: number }) {
         </div>
       </div>
 
-      <div className="relative mt-6 grid grid-cols-3 divide-x divide-white/[0.06] border-t border-white/[0.06] pt-6">
+      <div className="relative mt-6 grid grid-cols-2 divide-x divide-white/[0.06] border-t border-white/[0.06] pt-6">
         <StatItem label="作品" value={worksCount ?? profile.stats.works} />
-        <StatItem label="浏览" value={profile.stats.views} />
-        <StatItem label="喜欢" value={profile.stats.likes} />
+        <TotalViewsCounter />
       </div>
     </div>
   );

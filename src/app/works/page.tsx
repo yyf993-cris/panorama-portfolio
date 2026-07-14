@@ -1,8 +1,11 @@
 import Link from "next/link";
-import DesignGallery from "@/components/DesignGallery";
-import { designWorks } from "@/lib/design-data";
+import WorkGrid from "@/components/WorkGrid";
+import { getWorks } from "@/lib/data";
 
-export default function DesignPage() {
+export const dynamic = "force-dynamic";
+
+export default function WorksPage() {
+  const works = getWorks();
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <Link
@@ -16,16 +19,16 @@ export default function DesignPage() {
       </Link>
 
       <div className="mb-10">
-        <h1 className="text-3xl font-bold text-white">设计作品</h1>
+        <h1 className="text-3xl font-bold text-white">全部作品</h1>
         <p className="mt-2 text-zinc-400">
-          室内空间设计效果图，点击可查看大图。
+          空间设计效果图与 360° VR 全景漫游作品。
         </p>
         <span className="mt-3 inline-block text-sm text-zinc-500">
-          共 {designWorks.length} 件作品
+          共 {works.length} 件作品
         </span>
       </div>
 
-      <DesignGallery works={designWorks} />
+      <WorkGrid works={works} />
     </div>
   );
 }

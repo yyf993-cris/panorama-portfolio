@@ -1,10 +1,14 @@
 import ProfileCard from "@/components/ProfileCard";
 import WorkGrid from "@/components/WorkGrid";
-import DesignGallery from "@/components/DesignGallery";
-import { works } from "@/lib/works-data";
-import { designWorks } from "@/lib/design-data";
+import Link from "next/link";
+import { getWorks } from "@/lib/data";
+
+export const dynamic = "force-dynamic";
 
 export default function Home() {
+  const works = getWorks();
+  const featuredWorks = works.filter((w) => w.featured);
+
   return (
     <>
       <section className="relative overflow-hidden px-4 py-24 text-center sm:py-32">
@@ -35,43 +39,31 @@ export default function Home() {
       </section>
 
       <section id="about" className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
-        <ProfileCard worksCount={works.length + designWorks.length} />
+        <ProfileCard worksCount={works.length} />
       </section>
 
-      <section id="design" className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <section id="works" className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-semibold text-white">设计作品</h2>
-            <span className="rounded-full bg-violet-500/10 px-2.5 py-0.5 text-xs text-violet-400 ring-1 ring-violet-500/20">
-              效果图
-            </span>
-          </div>
-          <a
-            href="/design"
-            className="text-sm text-zinc-400 transition-colors hover:text-white"
-          >
-            查看全部 →
-          </a>
-        </div>
-        <DesignGallery works={designWorks.slice(0, 3)} />
-      </section>
-
-      <section id="panorama" className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl font-semibold text-white">全景漫游</h2>
+            <h2 className="text-xl font-semibold text-white">置顶作品</h2>
             <span className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-xs text-indigo-400 ring-1 ring-indigo-500/20">
-              360° VR
+              精选
             </span>
           </div>
-          <a
-            href="/panorama"
-            className="text-sm text-zinc-400 transition-colors hover:text-white"
-          >
-            查看全部 →
-          </a>
         </div>
-        <WorkGrid works={works.slice(0, 3)} />
+        <WorkGrid works={featuredWorks} />
+
+        <div className="mt-12 text-center">
+          <Link
+            href="/works"
+            className="inline-flex items-center gap-2 rounded-full border border-white/[0.1] bg-white/[0.03] px-6 py-3 text-sm font-medium text-zinc-300 transition-all hover:border-indigo-500/30 hover:bg-indigo-500/[0.06] hover:text-white"
+          >
+            查看更多作品
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
       </section>
     </>
   );

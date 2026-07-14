@@ -1,0 +1,29 @@
+{
+  "site": {
+    "title": "全景作品集 | 测试名称 2 ",
+    "description": "空间设计师 · VR全景摄影 | 用设计探索理想空间",
+    "url": "https://panorama-portfolio.vercel.app"
+  },
+  "profile": {
+    "name": "名字变更检查",
+    "avatar": "/works/avatar.jpg",
+    "bio": "VR 全景摄影师 | 用镜头记录世界每一个角落\n测试文案",
+    "socials": [
+      {
+        "platform": "微信",
+        "url": "#",
+        "icon": "wechat"
+      },
+      {
+        "platform": "微博",
+        "url": "https://weibo.com/",
+        "icon": "weibo"
+      },
+      {
+        "platform": "邮箱",
+        "url": "mailto:your@email.com",
+        "icon": "mail"
+      }
+    ]
+  }
+}

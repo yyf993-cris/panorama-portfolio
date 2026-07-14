@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { works } from "@/lib/works-data";
+import { getWorks } from "@/lib/data";
 import PanoViewer from "@/components/PanoViewer";
+import ImageAlbumViewer from "@/components/ImageAlbumViewer";
+import ViewCounter from "@/components/ViewCounter";
 
 function BackArrow() {
   return (
@@ -26,6 +28,7 @@ interface Props {
 
 export default async function WorkDetailPage({ params }: Props) {
   const { id } = await params;
+  const works = getWorks();
   const work = works.find((w) => w.id === id);
 
   if (!work) {
@@ -35,7 +38,7 @@ export default async function WorkDetailPage({ params }: Props) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <Link
-        href="/"
+        href="/works"
         className="mb-6 inline-flex items-center gap-1.5 text-sm text-zinc-400 transition-colors hover:text-white"
       >
         <BackArrow />
@@ -43,7 +46,12 @@ export default async function WorkDetailPage({ params }: Props) {
       </Link>
 
       <div className="mb-8">
-        <PanoViewer panoramaUrl={work.panoramaUrl} title={work.title} />
+        {work.type === "panorama" && work.panoramaUrl && (
+          <PanoViewer panoramaUrl={work.panoramaUrl} title={work.title} />
+        )}
+        {work.type === "album" && work.images && (
+          <ImageAlbumViewer images={work.images} title={work.title} />
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -64,11 +72,9 @@ export default async function WorkDetailPage({ params }: Props) {
 
         <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-6">
           <dl className="space-y-4">
-            {work.date && <MetaItem label="拍摄日期" value={work.date} />}
-            {work.location && <MetaItem label="拍摄地点" value={work.location} />}
-            {work.views > 0 && (
-              <MetaItem label="浏览量" value={work.views.toLocaleString("zh-CN")} />
-            )}
+            {work.date && <MetaItem label="创作日期" value={work.date} />}
+            {work.location && <MetaItem label="地点" value={work.location} />}
+            <ViewCounter workId={work.id} />
             {work.tags.length > 0 && (
               <div>
                 <dt className="mb-2 text-xs text-zinc-500">标签</dt>
@@ -76,7 +82,7 @@ export default async function WorkDetailPage({ params }: Props) {
                   {work.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full bg-white/[0.06] px-2.5 py-0.5 text-xs text-zinc-400"
+                      className="rounded-full bg-white/[0.05] px-2.5 py-0.5 text-xs text-zinc-300 ring-1 ring-white/[0.08]"
                     >
                       {tag}
                     </span>

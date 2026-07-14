@@ -1,6 +1,7 @@
-import { profile } from "@/lib/config";
+import { getProfile } from "@/lib/config";
 
 export default function Footer() {
+  const profile = getProfile();
   const year = new Date().getFullYear();
 
   return (

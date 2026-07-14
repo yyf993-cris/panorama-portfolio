@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import type { PanoramaWork } from "@/lib/types";
+import type { Work } from "@/lib/types";
 
 function LocationIcon() {
   return (
@@ -23,7 +23,7 @@ function EyeIcon() {
   );
 }
 
-export default function WorkCard({ work, index = 0 }: { work: PanoramaWork; index?: number }) {
+export default function WorkCard({ work, index = 0, viewCount }: { work: Work; index?: number; viewCount?: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -38,6 +38,7 @@ export default function WorkCard({ work, index = 0 }: { work: PanoramaWork; inde
                 src={work.cover}
                 alt={work.title}
                 fill
+                quality={90}
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
@@ -51,6 +52,10 @@ export default function WorkCard({ work, index = 0 }: { work: PanoramaWork; inde
             )}
 
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+            <span className="absolute right-3 top-3 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-zinc-300 backdrop-blur-sm">
+              {work.type === "panorama" ? "全景" : "套图"}
+            </span>
 
             {work.featured && (
               <span className="absolute left-3 top-3 rounded-full bg-indigo-500/90 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
@@ -68,7 +73,7 @@ export default function WorkCard({ work, index = 0 }: { work: PanoramaWork; inde
           <div className="p-4">
             <h3 className="line-clamp-1 font-medium text-zinc-100">{work.title}</h3>
 
-            {(work.location || work.views > 0) && (
+            {(work.location || (viewCount ?? work.views) > 0) && (
               <div className="mt-2 flex items-center gap-3 text-[11px] text-zinc-500">
                 {work.location && (
                   <span className="flex items-center gap-1">
@@ -76,16 +81,16 @@ export default function WorkCard({ work, index = 0 }: { work: PanoramaWork; inde
                     {work.location}
                   </span>
                 )}
-                {work.views > 0 && (
+                {(viewCount ?? work.views) > 0 && (
                   <span className="ml-auto flex items-center gap-1">
                     <EyeIcon />
-                    {work.views.toLocaleString("zh-CN")}
+                    {(viewCount ?? work.views).toLocaleString("zh-CN")}
                   </span>
                 )}
               </div>
             )}
 
-            {work.tags.length > 0 && (
+            {work.tags.length > 0 ? (
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {work.tags.slice(0, 3).map((tag) => (
                   <span
@@ -96,6 +101,8 @@ export default function WorkCard({ work, index = 0 }: { work: PanoramaWork; inde
                   </span>
                 ))}
               </div>
+            ) : (
+              <div className="mt-3 h-5" />
             )}
           </div>
         </div>

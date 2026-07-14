@@ -44,6 +44,24 @@ do_install() {
   npm install
 
   echo ""
+  echo "[$APP_NAME] 初始化数据目录..."
+  mkdir -p "$APP_DIR/data"
+  if [ ! -f "$APP_DIR/data/works.json" ]; then
+    echo "[]" > "$APP_DIR/data/works.json"
+    echo "  创建 data/works.json"
+  fi
+  if [ ! -f "$APP_DIR/data/config.json" ]; then
+    cat > "$APP_DIR/data/config.json" << 'EOF'
+{"site":{"title":"全景作品集","description":"空间设计师 · VR全景摄影","url":""},"profile":{"name":"Your Name","avatar":"/works/avatar.jpg","bio":"","socials":[]}}
+EOF
+    echo "  创建 data/config.json"
+  fi
+  if [ ! -f "$APP_DIR/data/views.json" ]; then
+    echo "{}" > "$APP_DIR/data/views.json"
+    echo "  创建 data/views.json"
+  fi
+
+  echo ""
   echo "[$APP_NAME] 同步素材..."
   bash "$APP_DIR/scripts/sync-assets.sh"
 
@@ -57,7 +75,8 @@ do_install() {
   echo ""
   echo "  启动服务:  ./scripts/server.sh start"
   echo "  开发模式:  ./scripts/server.sh dev"
-  echo "  访问地址:  http://localhost:$PORT"
+  echo "  前台地址:  http://localhost:$PORT"
+  echo "  管理后台:  http://localhost:$PORT/admin"
   echo "============================================"
 }
 

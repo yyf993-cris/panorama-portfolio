@@ -40,6 +40,10 @@ yarn-error.log*
 .server.pid
 .server.log
 
+# runtime data (views counter, works managed via admin)
+/data/views.json
+/data/works.json
+
 # generated assets (synced from assets/)
 /public/works/
 

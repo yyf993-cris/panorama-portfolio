@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { ReactNode } from "react";
-import type { PanoramaWork } from "@/lib/types";
+import type { Work } from "@/lib/types";
 import WorkCard from "./WorkCard";
 
 function FilterButton({
@@ -29,9 +29,17 @@ function FilterButton({
   );
 }
 
-export default function WorkGrid({ works }: { works: PanoramaWork[] }) {
+export default function WorkGrid({ works }: { works: Work[] }) {
   const allTags = Array.from(new Set(works.flatMap((w) => w.tags)));
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [viewCounts, setViewCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    fetch("/api/views")
+      .then((res) => res.json())
+      .then((data) => setViewCounts(data.details || {}))
+      .catch(() => {});
+  }, []);
 
   const filtered = activeTag ? works.filter((w) => w.tags.includes(activeTag)) : works;
 
@@ -89,7 +97,7 @@ export default function WorkGrid({ works }: { works: PanoramaWork[] }) {
             className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
           >
             {filtered.map((work, i) => (
-              <WorkCard key={work.id} work={work} index={i} />
+              <WorkCard key={work.id} work={work} index={i} viewCount={viewCounts[work.id]} />
             ))}
           </motion.div>
         )}

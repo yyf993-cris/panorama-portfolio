@@ -1,14 +1,15 @@
 import Link from "next/link";
-import { siteConfig } from "@/lib/config";
+import { getSiteConfig } from "@/lib/config";
 import MobileMenu from "./MobileMenu";
 
 const navLinks = [
   { href: "/", label: "首页" },
-  { href: "/#works", label: "作品集" },
+  { href: "/works", label: "作品集" },
   { href: "/#about", label: "关于" },
 ];
 
 export default function Header() {
+  const siteConfig = getSiteConfig();
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-black/60 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
