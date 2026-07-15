@@ -15,7 +15,7 @@ set "APP_DIR=%CD%"
 popd
 set "PID_FILE=%APP_DIR%\.server.pid"
 set "LOG_FILE=%APP_DIR%\.server.log"
-if "%PORT%"=="" set "PORT=3000"
+if not defined PORT set "PORT=3000"
 
 :: Node.js 最低版本要求
 set "NODE_MIN_VER=18"
@@ -54,13 +54,13 @@ exit /b 1
 :ensure_node
 :: 先检查本地安装的 Node.js
 if exist "%NODE_LOCAL_DIR%\node.exe" (
-    set "PATH=%NODE_LOCAL_DIR%;%NODE_LOCAL_DIR%\node_modules\npm\bin;%PATH%"
+    set "PATH=%NODE_LOCAL_DIR%;%PATH%"
 )
 
 :: 检查 node 是否可用
 where node >nul 2>&1
 if %ERRORLEVEL% neq 0 (
-    echo [!] 未检测到 Node.js，正在自动下载安装...
+    echo [WARN] 未检测到 Node.js，正在自动下载安装...
     goto :auto_install_node
 )
 
@@ -68,8 +68,8 @@ if %ERRORLEVEL% neq 0 (
 for /f "tokens=1 delims=." %%a in ('node -v') do set "NODE_VER_RAW=%%a"
 set "NODE_MAJOR=!NODE_VER_RAW:v=!"
 if !NODE_MAJOR! lss %NODE_MIN_VER% (
-    echo [!] Node.js 版本过低 (当前: !NODE_VER_RAW!，需要 ^>= v%NODE_MIN_VER%)
-    echo     正在自动下载新版本...
+    echo [WARN] Node.js 版本过低，当前: !NODE_VER_RAW!，需要 ^>= v%NODE_MIN_VER%
+    echo        正在自动下载新版本...
     goto :auto_install_node
 )
 
@@ -93,25 +93,24 @@ echo.
 
 :: 检查是否已下载过
 if exist "%NODE_DOWNLOAD_PATH%" (
-    echo   [跳过] 安装包已存在，使用缓存
+    echo   [skip] 安装包已存在，使用缓存
     goto :extract_node
 )
 
 :: 使用 PowerShell 下载
 echo   [1/3] 下载中...（约 30MB，请稍候）
-powershell -NoProfile -Command ^
-    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri '%NODE_URL%' -OutFile '%NODE_DOWNLOAD_PATH%' -UseBasicParsing"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $ProgressPreference = 'SilentlyContinue'; try { Invoke-WebRequest -Uri '%NODE_URL%' -OutFile '%NODE_DOWNLOAD_PATH%' -UseBasicParsing; exit 0 } catch { Write-Host $_.Exception.Message; exit 1 }"
 
 if !ERRORLEVEL! neq 0 (
-    echo   [X] 下载失败！请检查网络连接。
-    echo       你也可以手动下载: %NODE_URL%
-    echo       解压到: %NODE_LOCAL_DIR%
+    echo   [FAIL] 下载失败，请检查网络连接。
+    echo          手动下载: %NODE_URL%
+    echo          解压到: %NODE_LOCAL_DIR%
     del /f "%NODE_DOWNLOAD_PATH%" >nul 2>&1
     exit /b 1
 )
 
 if not exist "%NODE_DOWNLOAD_PATH%" (
-    echo   [X] 下载失败，文件不存在
+    echo   [FAIL] 下载失败，文件不存在
     exit /b 1
 )
 
@@ -121,22 +120,25 @@ echo   [2/3] 解压中...
 if exist "%NODE_EXTRACT_DIR%" rd /s /q "%NODE_EXTRACT_DIR%"
 if exist "%NODE_LOCAL_DIR%" rd /s /q "%NODE_LOCAL_DIR%"
 
-powershell -NoProfile -Command ^
-    "$ProgressPreference = 'SilentlyContinue'; Expand-Archive -Path '%NODE_DOWNLOAD_PATH%' -DestinationPath '%TEMP%' -Force"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ProgressPreference = 'SilentlyContinue'; try { Expand-Archive -Path '%NODE_DOWNLOAD_PATH%' -DestinationPath '%TEMP%' -Force; exit 0 } catch { Write-Host $_.Exception.Message; exit 1 }"
 
 if !ERRORLEVEL! neq 0 (
-    echo   [X] 解压失败
+    echo   [FAIL] 解压失败
     exit /b 1
 )
 
 :: 移动到项目本地目录
 echo   [3/3] 安装到项目目录...
-move "%NODE_EXTRACT_DIR%" "%NODE_LOCAL_DIR%" >nul 2>&1
-if !ERRORLEVEL! neq 0 (
-    :: move 失败时用 xcopy
-    mkdir "%NODE_LOCAL_DIR%" >nul 2>&1
-    xcopy /E /I /Q /Y "%NODE_EXTRACT_DIR%\*" "%NODE_LOCAL_DIR%\" >nul
-    rd /s /q "%NODE_EXTRACT_DIR%" >nul 2>&1
+if exist "%NODE_EXTRACT_DIR%" (
+    move "%NODE_EXTRACT_DIR%" "%NODE_LOCAL_DIR%" >nul 2>&1
+    if !ERRORLEVEL! neq 0 (
+        mkdir "%NODE_LOCAL_DIR%" >nul 2>&1
+        xcopy /E /I /Q /Y "%NODE_EXTRACT_DIR%\*" "%NODE_LOCAL_DIR%\" >nul
+        rd /s /q "%NODE_EXTRACT_DIR%" >nul 2>&1
+    )
+) else (
+    echo   [FAIL] 解压后未找到目录: %NODE_EXTRACT_DIR%
+    exit /b 1
 )
 
 :: 加入 PATH
@@ -145,8 +147,8 @@ set "PATH=%NODE_LOCAL_DIR%;%PATH%"
 :: 验证安装
 where node >nul 2>&1
 if !ERRORLEVEL! neq 0 (
-    echo   [X] 安装后仍无法找到 node，请手动安装
-    echo       下载: https://nodejs.org/
+    echo   [FAIL] 安装后仍无法找到 node，请手动安装
+    echo          下载: https://nodejs.org/
     exit /b 1
 )
 
@@ -168,22 +170,20 @@ if not exist "%APP_DIR%\node_modules" (
     echo [%APP_NAME%] node_modules 不存在，安装依赖...
     call npm install
     if !ERRORLEVEL! neq 0 (
-        echo [X] npm install 失败
+        echo [FAIL] npm install 失败
         exit /b 1
     )
     exit /b 0
 )
 
-:: 检查 package.json 是否比 node_modules 更新（依赖可能有变更）
-:: 使用 PowerShell 比较文件时间戳
-powershell -NoProfile -Command ^
-    "$pkg = (Get-Item '%APP_DIR%\package.json').LastWriteTime; $nm = (Get-Item '%APP_DIR%\node_modules\.package-lock.json' -ErrorAction SilentlyContinue); if (!$nm -or $pkg -gt $nm.LastWriteTime) { exit 1 } else { exit 0 }"
+:: 检查 package.json 是否比 node_modules 更新
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$pkg = (Get-Item '%APP_DIR%\package.json').LastWriteTime; $lock = Get-Item '%APP_DIR%\node_modules\.package-lock.json' -ErrorAction SilentlyContinue; if (-not $lock -or $pkg -gt $lock.LastWriteTime) { exit 1 } else { exit 0 }"
 
 if !ERRORLEVEL! equ 1 (
     echo [%APP_NAME%] package.json 有更新，同步依赖...
     call npm install
     if !ERRORLEVEL! neq 0 (
-        echo [X] npm install 失败
+        echo [FAIL] npm install 失败
         exit /b 1
     )
 ) else (
@@ -203,10 +203,10 @@ if !ERRORLEVEL! neq 0 exit /b 1
 
 cd /d "%APP_DIR%"
 
-echo [1/4] 更新 npm 依赖（含升级小版本）...
+echo [1/4] 更新 npm 依赖...
 call npm update
 if !ERRORLEVEL! neq 0 (
-    echo [X] npm update 失败
+    echo [FAIL] npm update 失败
     exit /b 1
 )
 
@@ -221,16 +221,16 @@ echo.
 echo [4/4] 重新构建...
 call npm run build
 if !ERRORLEVEL! neq 0 (
-    echo [X] 构建失败
+    echo [FAIL] 构建失败
     exit /b 1
 )
 
 echo.
-echo [OK] 更新完成！使用 scripts\server.bat restart 重启服务。
+echo [OK] 更新完成。使用 scripts\server.bat restart 重启服务。
 exit /b 0
 
 :: ============================================================
-:: do_install - 一键安装部署（自动下载 Node.js + 依赖 + 构建）
+:: do_install - 一键安装部署
 :: ============================================================
 :do_install
 echo.
@@ -239,13 +239,13 @@ echo   %APP_NAME% - 一键安装部署
 echo  ========================================
 echo.
 
-:: Step 1: 确保 Node.js 可用（自动下载）
+:: Step 1: 确保 Node.js 可用
 echo [1/6] 检查 Node.js 环境...
 call :ensure_node
 if !ERRORLEVEL! neq 0 (
     echo.
-    echo [X] 无法获取 Node.js，安装中止。
-    echo     请手动下载安装: https://nodejs.org/
+    echo [FAIL] 无法获取 Node.js，安装中止。
+    echo        请手动下载安装: https://nodejs.org/
     exit /b 1
 )
 for /f "delims=" %%v in ('node -v') do echo        Node.js: %%v
@@ -257,7 +257,7 @@ echo [2/6] 安装项目依赖...
 cd /d "%APP_DIR%"
 call npm install
 if !ERRORLEVEL! neq 0 (
-    echo [X] npm install 失败
+    echo [FAIL] npm install 失败
     exit /b 1
 )
 echo        [OK]
@@ -268,15 +268,15 @@ echo [3/6] 初始化数据目录...
 if not exist "%APP_DIR%\data" mkdir "%APP_DIR%\data"
 
 if not exist "%APP_DIR%\data\works.json" (
-    echo []> "%APP_DIR%\data\works.json"
+    >"%APP_DIR%\data\works.json" echo []
     echo        创建 data/works.json
 )
 if not exist "%APP_DIR%\data\config.json" (
-    (echo {"site":{"title":"全景作品集","description":"空间设计师 · VR全景摄影","url":""},"profile":{"name":"Your Name","avatar":"/works/avatar.jpg","bio":"","socials":[]}})> "%APP_DIR%\data\config.json"
+    powershell -NoProfile -Command "Set-Content -Path '%APP_DIR%\data\config.json' -Value '{\"site\":{\"title\":\"全景作品集\",\"description\":\"空间设计师 VR全景摄影\",\"url\":\"\"},\"profile\":{\"name\":\"Your Name\",\"avatar\":\"/works/avatar.jpg\",\"bio\":\"\",\"socials\":[]}}' -Encoding UTF8"
     echo        创建 data/config.json
 )
 if not exist "%APP_DIR%\data\views.json" (
-    echo {}> "%APP_DIR%\data\views.json"
+    >"%APP_DIR%\data\views.json" echo {}
     echo        创建 data/views.json
 )
 echo        [OK]
@@ -286,16 +286,16 @@ echo.
 echo [4/6] 同步素材...
 call node "%APP_DIR%\scripts\sync-assets.mjs"
 if !ERRORLEVEL! neq 0 (
-    echo        [!] 素材同步失败，跳过（不影响运行）
+    echo        [WARN] 素材同步失败，跳过（不影响运行）
 )
 echo.
 
-:: Step 5: 环境变量检查（仅提示）
+:: Step 5: 环境变量检查
 echo [5/6] 检查环境配置...
 if exist "%APP_DIR%\.env.local" (
     echo        .env.local 已配置
 ) else (
-    echo        [提示] 未发现 .env.local（不影响本地模式）
+    echo        [INFO] 未发现 .env.local（不影响本地模式）
     echo        如需连接 Notion CMS，请执行:
     echo          copy .env.local.example .env.local
     echo          然后编辑填入 NOTION_API_KEY 和 NOTION_DATABASE_ID
@@ -307,13 +307,13 @@ echo [6/6] 构建生产版本...
 cd /d "%APP_DIR%"
 call npm run build
 if !ERRORLEVEL! neq 0 (
-    echo [X] 构建失败
+    echo [FAIL] 构建失败
     exit /b 1
 )
 
 echo.
 echo  ============================================
-echo   [OK] 安装完成！
+echo   [OK] 安装完成
 echo.
 echo    启动服务:   scripts\server.bat start
 echo    开发模式:   scripts\server.bat dev
@@ -340,7 +340,7 @@ if not exist "%APP_DIR%\.next" (
     cd /d "%APP_DIR%"
     call npm run build
     if !ERRORLEVEL! neq 0 (
-        echo [X] 构建失败
+        echo [FAIL] 构建失败
         exit /b 1
     )
 )
@@ -350,32 +350,45 @@ if exist "%PID_FILE%" (
     set /p EXISTING_PID=<"%PID_FILE%"
     tasklist /FI "PID eq !EXISTING_PID!" 2>nul | find "!EXISTING_PID!" >nul 2>&1
     if !ERRORLEVEL! equ 0 (
-        echo [%APP_NAME%] 服务已在运行 (PID: !EXISTING_PID!)
+        echo [%APP_NAME%] 服务已在运行, PID: !EXISTING_PID!
         echo   访问: http://localhost:%PORT%
         exit /b 0
     )
 )
 
-echo [%APP_NAME%] 启动生产服务 (端口: %PORT%)...
+echo [%APP_NAME%] 启动生产服务, 端口: %PORT% ...
 cd /d "%APP_DIR%"
 
-:: 使用 PowerShell 后台启动进程并获取 PID
-powershell -NoProfile -Command ^
-    "$env:PORT='%PORT%'; $p = Start-Process -FilePath 'node' -ArgumentList 'node_modules\.bin\next', 'start', '-p', '%PORT%' -WorkingDirectory '%APP_DIR%' -WindowStyle Hidden -RedirectStandardOutput '%LOG_FILE%' -RedirectStandardError '%LOG_FILE%.err' -PassThru; $p.Id" > "%PID_FILE%"
+:: 生成启动脚本（避免 PowerShell 复杂转义）
+>"%APP_DIR%\.start-server.cmd" (
+    echo @echo off
+    echo cd /d "%APP_DIR%"
+    echo set "PORT=%PORT%"
+    echo call npx next start -p %PORT%
+)
+
+:: 使用 PowerShell 后台启动并获取 PID
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$p = Start-Process -FilePath 'cmd.exe' -ArgumentList '/c \"%APP_DIR%\.start-server.cmd\" > \"%LOG_FILE%\" 2>&1' -WorkingDirectory '%APP_DIR%' -WindowStyle Hidden -PassThru; Write-Output $p.Id" > "%PID_FILE%"
 
 :: 等待启动
-timeout /t 3 /nobreak >nul
+echo   等待服务启动...
+timeout /t 4 /nobreak >nul
 
+:: 验证启动状态
 set /p NEW_PID=<"%PID_FILE%"
+:: 去除可能的空格/换行
+for /f "tokens=*" %%a in ("!NEW_PID!") do set "NEW_PID=%%a"
+
 tasklist /FI "PID eq !NEW_PID!" 2>nul | find "!NEW_PID!" >nul 2>&1
 if !ERRORLEVEL! equ 0 (
-    echo [OK] 服务已启动
+    echo   [OK] 服务已启动
     echo   PID:  !NEW_PID!
     echo   日志: %LOG_FILE%
     echo   访问: http://localhost:%PORT%
 ) else (
-    echo [X] 启动失败，查看日志: type "%LOG_FILE%"
+    echo   [FAIL] 启动失败，查看日志: type "%LOG_FILE%"
     del /f "%PID_FILE%" >nul 2>&1
+    del /f "%APP_DIR%\.start-server.cmd" >nul 2>&1
     exit /b 1
 )
 exit /b 0
@@ -390,15 +403,18 @@ if not exist "%PID_FILE%" (
 )
 
 set /p PID=<"%PID_FILE%"
+for /f "tokens=*" %%a in ("!PID!") do set "PID=%%a"
+
 tasklist /FI "PID eq !PID!" 2>nul | find "!PID!" >nul 2>&1
 if !ERRORLEVEL! equ 0 (
-    echo [%APP_NAME%] 停止服务 (PID: !PID!)...
+    echo [%APP_NAME%] 停止服务, PID: !PID! ...
     taskkill /PID !PID! /T /F >nul 2>&1
     echo [OK] 服务已停止
 ) else (
     echo [%APP_NAME%] 进程已不存在
 )
 del /f "%PID_FILE%" >nul 2>&1
+del /f "%APP_DIR%\.start-server.cmd" >nul 2>&1
 exit /b 0
 
 :: ============================================================
@@ -416,7 +432,7 @@ cd /d "%APP_DIR%"
 echo [%APP_NAME%] 重新构建...
 call npm run build
 if !ERRORLEVEL! neq 0 (
-    echo [X] 构建失败
+    echo [FAIL] 构建失败
     exit /b 1
 )
 echo.
@@ -441,13 +457,15 @@ if !ERRORLEVEL! equ 0 (
 
 :: 本地 Node 检查
 if exist "%NODE_LOCAL_DIR%\node.exe" (
-    echo   Node位置: %NODE_LOCAL_DIR% (项目内置)
+    echo   Node位置: %NODE_LOCAL_DIR% [项目内置]
 ) else (
-    where node 2>nul | findstr /v "^$" >nul && (
-        for /f "delims=" %%p in ('where node') do echo   Node位置: %%p
+    for /f "delims=" %%p in ('where node 2^>nul') do (
+        echo   Node位置: %%p
+        goto :status_deps
     )
 )
 
+:status_deps
 :: 依赖状态
 if exist "%APP_DIR%\node_modules" (
     echo   依赖:     已安装
@@ -470,6 +488,7 @@ if not exist "%PID_FILE%" (
 )
 
 set /p PID=<"%PID_FILE%"
+for /f "tokens=*" %%a in ("!PID!") do set "PID=%%a"
 tasklist /FI "PID eq !PID!" 2>nul | find "!PID!" >nul 2>&1
 if !ERRORLEVEL! equ 0 (
     echo   服务:     运行中
@@ -478,7 +497,7 @@ if !ERRORLEVEL! equ 0 (
     echo   日志:     %LOG_FILE%
     echo   访问:     http://localhost:%PORT%
 ) else (
-    echo   服务:     未运行 (残留PID文件已清理)
+    echo   服务:     未运行 [残留PID文件已清理]
     del /f "%PID_FILE%" >nul 2>&1
 )
 echo.
@@ -493,7 +512,7 @@ if !ERRORLEVEL! neq 0 exit /b 1
 call :ensure_deps
 if !ERRORLEVEL! neq 0 exit /b 1
 
-echo [%APP_NAME%] 启动开发服务 (端口: %PORT%, Ctrl+C 退出)...
+echo [%APP_NAME%] 启动开发服务, 端口: %PORT%, Ctrl+C 退出 ...
 cd /d "%APP_DIR%"
 call npm run dev
 exit /b 0
