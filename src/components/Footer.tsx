@@ -1,31 +1,21 @@
 import { getProfile } from "@/lib/config";
+import { getConfig } from "@/lib/data";
+import FooterSocialLinks from "./FooterSocialLinks";
 
 export default function Footer() {
   const profile = getProfile();
+  const config = getConfig();
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto border-t border-white/[0.06] py-10">
+    <footer className="mt-auto border-t border-border py-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-          <p className="text-sm text-zinc-600">
+          <p className="text-sm text-muted">
             © {year} {profile.name} · Powered by Next.js &amp; Notion
           </p>
 
-          <div className="flex items-center gap-4">
-            {profile.socials.map((social) => (
-              <a
-                key={social.platform}
-                href={social.url}
-                target={social.url.startsWith("mailto") ? undefined : "_blank"}
-                rel="noopener noreferrer"
-                title={social.platform}
-                className="text-xs text-zinc-600 transition-colors hover:text-zinc-300"
-              >
-                {social.platform}
-              </a>
-            ))}
-          </div>
+          <FooterSocialLinks socials={profile.socials} wechatQr={config.wechatQr} />
         </div>
       </div>
     </footer>

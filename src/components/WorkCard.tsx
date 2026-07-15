@@ -31,7 +31,7 @@ export default function WorkCard({ work, index = 0, viewCount }: { work: Work; i
       transition={{ duration: 0.35, delay: index * 0.06, ease: "easeOut" }}
     >
       <Link href={`/works/${work.id}`} className="group block">
-        <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] transition-all duration-300 hover:border-white/[0.16] hover:bg-white/[0.05]">
+        <div className="overflow-hidden rounded-xl border border-border bg-surface transition-all duration-300 hover:border-border-hover hover:bg-surface-hover">
           <div className="relative aspect-video overflow-hidden bg-zinc-900">
             {work.cover && work.cover !== "/placeholder.jpg" ? (
               <Image
@@ -71,10 +71,10 @@ export default function WorkCard({ work, index = 0, viewCount }: { work: Work; i
           </div>
 
           <div className="p-4">
-            <h3 className="line-clamp-1 font-medium text-zinc-100">{work.title}</h3>
+            <h3 className="line-clamp-1 font-medium text-foreground">{work.title}</h3>
 
             {(work.location || (viewCount ?? work.views) > 0) && (
-              <div className="mt-2 flex items-center gap-3 text-[11px] text-zinc-500">
+              <div className="mt-2 flex items-center gap-3 text-[11px] text-muted">
                 {work.location && (
                   <span className="flex items-center gap-1">
                     <LocationIcon />
@@ -95,7 +95,7 @@ export default function WorkCard({ work, index = 0, viewCount }: { work: Work; i
                 {work.tags.slice(0, 3).map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-full bg-white/[0.06] px-2.5 py-0.5 text-[11px] text-zinc-400"
+                    className="rounded-full bg-surface px-2.5 py-0.5 text-[11px] text-muted"
                   >
                     {tag}
                   </span>

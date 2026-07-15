@@ -15,15 +15,12 @@
         "icon": "wechat"
       },
       {
-        "platform": "微博",
-        "url": "https://weibo.com/",
-        "icon": "weibo"
-      },
-      {
-        "platform": "邮箱",
-        "url": "mailto:your@email.com",
-        "icon": "mail"
+        "platform": "电话",
+        "url": "tel:13800138000",
+        "icon": "phone"
       }
     ]
-  }
+  },
+  "heroLogo": "/works/design-9.jpg",
+  "wechatQr": "/works/IMG_2346.JPG"
 }

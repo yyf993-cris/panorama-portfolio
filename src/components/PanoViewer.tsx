@@ -21,16 +21,16 @@ function isEmbedUrl(url: string): boolean {
 function LoadingSpinner() {
   return (
     <div className="flex flex-col items-center justify-center gap-3">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-700 border-t-indigo-500" />
-      <p className="text-sm text-zinc-500">正在加载全景图...</p>
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-indigo-500" />
+      <p className="text-sm text-muted">正在加载全景图...</p>
     </div>
   );
 }
 
 function EmptyState() {
   return (
-    <div className="flex h-[50vh] items-center justify-center rounded-xl border border-white/[0.06] bg-zinc-900/50">
-      <div className="text-center text-zinc-500">
+    <div className="flex h-[50vh] items-center justify-center rounded-xl border border-border bg-surface">
+      <div className="text-center text-muted">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mx-auto mb-3 opacity-40" aria-hidden="true">
           <circle cx="12" cy="12" r="10" />
           <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
@@ -46,7 +46,7 @@ function EmbedViewer({ url, title }: { url: string; title: string }) {
 
   return (
     <div
-      className="relative overflow-hidden rounded-xl border border-white/[0.06]"
+      className="relative overflow-hidden rounded-xl border border-border"
       style={{ height: "clamp(300px, 70vh, 800px)" }}
     >
       {!loaded && (
@@ -115,7 +115,7 @@ function PannellumRenderer({ url, title }: { url: string; title: string }) {
 
   return (
     <div
-      className="relative overflow-hidden rounded-xl border border-white/[0.06]"
+      className="relative overflow-hidden rounded-xl border border-border"
       style={{ height: "clamp(300px, 70vh, 800px)" }}
     >
       {isLoading && (

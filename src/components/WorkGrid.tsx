@@ -21,7 +21,7 @@ function FilterButton({
       className={`relative rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-200 ${
         active
           ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-          : "border border-white/[0.08] bg-white/[0.03] text-zinc-400 hover:border-white/[0.16] hover:text-zinc-200"
+          : "border border-border bg-surface text-muted hover:border-border-hover hover:text-foreground"
       }`}
     >
       {children}
@@ -46,12 +46,12 @@ export default function WorkGrid({ works }: { works: Work[] }) {
   if (works.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mb-4 text-zinc-700" aria-hidden="true">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mb-4 text-muted" aria-hidden="true">
           <circle cx="12" cy="12" r="10" />
           <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
         </svg>
-        <p className="text-zinc-500">暂无作品</p>
-        <p className="mt-1 text-sm text-zinc-600">请在管理后台添加作品并勾选「置顶」以在此展示</p>
+        <p className="text-muted">暂无作品</p>
+        <p className="mt-1 text-sm text-muted">请在管理后台添加作品并勾选「置顶」以在此展示</p>
       </div>
     );
   }
@@ -83,7 +83,7 @@ export default function WorkGrid({ works }: { works: Work[] }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="py-16 text-center text-zinc-500"
+            className="py-16 text-center text-muted"
           >
             此分类暂无作品
           </motion.div>

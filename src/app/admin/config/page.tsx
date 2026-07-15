@@ -12,17 +12,20 @@ interface Social {
 interface ConfigState {
   site: { title: string; description: string; url: string };
   profile: { name: string; avatar: string; bio: string; socials: Social[] };
+  heroLogo?: string;
+  wechatQr?: string;
 }
 
 const DEFAULT_CONFIG: ConfigState = {
   site: { title: "", description: "", url: "" },
   profile: { name: "", avatar: "", bio: "", socials: [] },
+  heroLogo: "",
+  wechatQr: "",
 };
 
 const ICON_OPTIONS = [
   { value: "wechat", label: "微信" },
-  { value: "weibo", label: "微博" },
-  { value: "mail", label: "邮件" },
+  { value: "phone", label: "电话" },
 ];
 
 export default function AdminConfigPage() {
@@ -30,6 +33,7 @@ export default function AdminConfigPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/config")
@@ -75,6 +79,34 @@ export default function AdminConfigPage() {
         socials: c.profile.socials.filter((_, i) => i !== index),
       },
     }));
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+    const data = await res.json();
+    if (data.url) {
+      setConfig((c) => ({ ...c, heroLogo: data.url }));
+    }
+    setUploading(false);
+  };
+
+  const handleQrUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+    const data = await res.json();
+    if (data.url) {
+      setConfig((c) => ({ ...c, wechatQr: data.url }));
+    }
+    setUploading(false);
   };
 
   const handleSave = async () => {
@@ -219,6 +251,98 @@ export default function AdminConfigPage() {
                   </button>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5 space-y-4">
+          <h2 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-2">
+            首页 Logo
+          </h2>
+          <p className="text-xs text-gray-500">
+            支持 JPG / PNG / WebP / GIF（含动图），建议尺寸不超过 640×512
+          </p>
+
+          <div className="flex items-center gap-3">
+            <input
+              type="text"
+              value={config.heroLogo || ""}
+              onChange={(e) => setConfig((c) => ({ ...c, heroLogo: e.target.value }))}
+              placeholder="/works/logo.png 或留空隐藏"
+              className={inputClass}
+            />
+            <label className="shrink-0 px-3 py-2 text-xs text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer">
+              {uploading ? "上传中..." : "上传"}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={handleLogoUpload}
+                className="hidden"
+                disabled={uploading}
+              />
+            </label>
+          </div>
+
+          {config.heroLogo && (
+            <div className="mt-2 flex items-center gap-3">
+              <img
+                src={config.heroLogo}
+                alt="Logo 预览"
+                className="max-h-20 w-auto object-contain border border-gray-200 rounded-lg p-1"
+              />
+              <button
+                type="button"
+                onClick={() => setConfig((c) => ({ ...c, heroLogo: "" }))}
+                className="text-xs text-red-500 hover:text-red-700"
+              >
+                清除
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5 space-y-4">
+          <h2 className="text-sm font-semibold text-gray-800 border-b border-gray-100 pb-2">
+            微信二维码
+          </h2>
+          <p className="text-xs text-gray-500">
+            上传微信个人二维码，用户点击微信图标时弹窗展示
+          </p>
+
+          <div className="flex items-center gap-3">
+            <input
+              type="text"
+              value={config.wechatQr || ""}
+              onChange={(e) => setConfig((c) => ({ ...c, wechatQr: e.target.value }))}
+              placeholder="/works/wechat-qr.png 或留空"
+              className={inputClass}
+            />
+            <label className="shrink-0 px-3 py-2 text-xs text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer">
+              {uploading ? "上传中..." : "上传"}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleQrUpload}
+                className="hidden"
+                disabled={uploading}
+              />
+            </label>
+          </div>
+
+          {config.wechatQr && (
+            <div className="mt-2 flex items-center gap-3">
+              <img
+                src={config.wechatQr}
+                alt="二维码预览"
+                className="max-h-28 w-auto object-contain border border-gray-200 rounded-lg p-1"
+              />
+              <button
+                type="button"
+                onClick={() => setConfig((c) => ({ ...c, wechatQr: "" }))}
+                className="text-xs text-red-500 hover:text-red-700"
+              >
+                清除
+              </button>
             </div>
           )}
         </div>

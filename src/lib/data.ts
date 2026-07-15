@@ -35,6 +35,8 @@ export interface SiteConfig {
     bio: string;
     socials: { platform: string; url: string; icon: string }[];
   };
+  heroLogo?: string;
+  wechatQr?: string;
 }
 
 export function getWorks(): Work[] {
@@ -53,6 +55,8 @@ export function getConfig(): SiteConfig {
   return readJSON<SiteConfig>(CONFIG_FILE, {
     site: { title: "", description: "", url: "" },
     profile: { name: "", avatar: "/avatar.jpg", bio: "", socials: [] },
+    heroLogo: "",
+    wechatQr: "",
   });
 }
 

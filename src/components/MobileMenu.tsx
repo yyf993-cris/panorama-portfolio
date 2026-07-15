@@ -18,7 +18,7 @@ export default function MobileMenu({ links }: { links: NavLink[] }) {
         onClick={() => setIsOpen(!isOpen)}
         aria-label={isOpen ? "关闭菜单" : "打开菜单"}
         aria-expanded={isOpen}
-        className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:text-white"
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:text-foreground"
       >
         <motion.div
           animate={isOpen ? "open" : "closed"}
@@ -52,7 +52,7 @@ export default function MobileMenu({ links }: { links: NavLink[] }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute inset-x-0 top-16 z-50 border-b border-white/[0.06] bg-black/95 backdrop-blur-md"
+            className="absolute inset-x-0 top-16 z-50 border-b border-border bg-background/95 backdrop-blur-md"
           >
             <nav className="mx-auto max-w-7xl px-4 py-4">
               {links.map((link, i) => (
@@ -65,7 +65,7 @@ export default function MobileMenu({ links }: { links: NavLink[] }) {
                   <Link
                     href={link.href}
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center py-3 text-base text-zinc-300 transition-colors hover:text-white border-b border-white/[0.04] last:border-0"
+                    className="flex items-center py-3 text-base text-foreground transition-colors hover:text-foreground border-b border-border last:border-0"
                   >
                     {link.label}
                   </Link>

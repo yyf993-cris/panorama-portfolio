@@ -3,6 +3,7 @@ import "./globals.css";
 import PortfolioShell from "@/components/PortfolioShell";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ThemeProvider from "@/components/ThemeProvider";
 import { getConfig } from "@/lib/data";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -28,11 +29,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN" className="h-full antialiased">
+    <html lang="zh-CN" className="h-full antialiased" suppressHydrationWarning>
       <body className="flex min-h-full flex-col bg-background text-foreground">
-        <PortfolioShell header={<Header />} footer={<Footer />}>
-          {children}
-        </PortfolioShell>
+        <ThemeProvider>
+          <PortfolioShell header={<Header />} footer={<Footer />}>
+            {children}
+          </PortfolioShell>
+        </ThemeProvider>
       </body>
     </html>
   );

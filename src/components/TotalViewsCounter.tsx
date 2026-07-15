@@ -14,10 +14,10 @@ export default function TotalViewsCounter() {
 
   return (
     <div className="text-center">
-      <div className="text-xl font-bold text-white tabular-nums">
+      <div className="text-xl font-bold text-foreground tabular-nums">
         {total !== null ? total.toLocaleString("zh-CN") : "—"}
       </div>
-      <div className="mt-0.5 text-xs text-zinc-500">浏览</div>
+      <div className="mt-0.5 text-xs text-muted">浏览</div>
     </div>
   );
 }

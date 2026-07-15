@@ -16,8 +16,8 @@ export default function ViewCounter({ workId }: { workId: string }) {
 
   return (
     <div>
-      <dt className="text-xs text-zinc-500">浏览量</dt>
-      <dd className="mt-0.5 text-sm text-zinc-200">{views.toLocaleString("zh-CN")}</dd>
+      <dt className="text-xs text-muted">浏览量</dt>
+      <dd className="mt-0.5 text-sm text-foreground">{views.toLocaleString("zh-CN")}</dd>
     </div>
   );
 }
