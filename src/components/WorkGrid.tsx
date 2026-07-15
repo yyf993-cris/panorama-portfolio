@@ -51,7 +51,7 @@ export default function WorkGrid({ works }: { works: Work[] }) {
           <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
         </svg>
         <p className="text-zinc-500">暂无作品</p>
-        <p className="mt-1 text-sm text-zinc-600">配置 Notion 数据库后作品将自动展示</p>
+        <p className="mt-1 text-sm text-zinc-600">请在管理后台添加作品并勾选「置顶」以在此展示</p>
       </div>
     );
   }
