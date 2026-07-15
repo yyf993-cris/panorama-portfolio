@@ -359,16 +359,17 @@ if exist "%PID_FILE%" (
 echo [%APP_NAME%] 启动生产服务, 端口: %PORT% ...
 cd /d "%APP_DIR%"
 
-:: 生成启动脚本（避免 PowerShell 复杂转义）
+:: 生成启动脚本（包含完整环境，避免 PATH 丢失和转义问题）
 >"%APP_DIR%\.start-server.cmd" (
     echo @echo off
     echo cd /d "%APP_DIR%"
+    echo set "PATH=%NODE_LOCAL_DIR%;%APP_DIR%\node_modules\.bin;%PATH%"
     echo set "PORT=%PORT%"
-    echo call npx next start -p %PORT%
+    echo node "%APP_DIR%\node_modules\next\dist\bin\next" start -p %PORT% ^> "%LOG_FILE%" 2^>^&1
 )
 
-:: 使用 PowerShell 后台启动并获取 PID
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$p = Start-Process -FilePath 'cmd.exe' -ArgumentList '/c \"%APP_DIR%\.start-server.cmd\" > \"%LOG_FILE%\" 2>&1' -WorkingDirectory '%APP_DIR%' -WindowStyle Hidden -PassThru; Write-Output $p.Id" > "%PID_FILE%"
+:: 使用 PowerShell 后台启动 .cmd 文件并获取 PID
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$p = Start-Process -FilePath '%APP_DIR%\.start-server.cmd' -WindowStyle Hidden -PassThru; Write-Output $p.Id" > "%PID_FILE%"
 
 :: 等待启动
 echo   等待服务启动...
