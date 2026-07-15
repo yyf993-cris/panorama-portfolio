@@ -39,6 +39,10 @@ yarn-error.log*
 # server runtime
 .server.pid
 .server.log
+.server.log.err
+.start-server.cmd
+/log/
+/.node/
 
 # runtime data (views counter, works managed via admin)
 /data/views.json
