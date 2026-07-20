@@ -7,6 +7,9 @@ const EMBED_DOMAINS = [
   "vr.shinewonder.com",
   "720yun.com",
   "www.720yun.com",
+];
+
+const EXTERNAL_ONLY_DOMAINS = [
   "vr.justeasy.cn",
 ];
 
@@ -14,6 +17,15 @@ function isEmbedUrl(url: string): boolean {
   try {
     const hostname = new URL(url).hostname;
     return EMBED_DOMAINS.some((d) => hostname === d || hostname.endsWith("." + d));
+  } catch {
+    return false;
+  }
+}
+
+function isExternalOnlyUrl(url: string): boolean {
+  try {
+    const hostname = new URL(url).hostname;
+    return EXTERNAL_ONLY_DOMAINS.some((d) => hostname === d || hostname.endsWith("." + d));
   } catch {
     return false;
   }
@@ -140,6 +152,32 @@ function PannellumRenderer({ url, title }: { url: string; title: string }) {
   );
 }
 
+function ExternalViewer({ url, title }: { url: string; title: string }) {
+  return (
+    <div
+      className="relative flex flex-col items-center justify-center gap-4 overflow-hidden rounded-xl border border-border bg-zinc-900"
+      style={{ height: "clamp(300px, 70vh, 800px)" }}
+    >
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-zinc-400" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+      </svg>
+      <p className="text-sm text-zinc-400">{title}</p>
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
+        </svg>
+        打开全景漫游
+      </a>
+    </div>
+  );
+}
+
 export default function PanoViewer({
   panoramaUrl,
   title,
@@ -148,6 +186,7 @@ export default function PanoViewer({
   title: string;
 }) {
   if (!panoramaUrl) return <EmptyState />;
+  if (isExternalOnlyUrl(panoramaUrl)) return <ExternalViewer url={panoramaUrl} title={title} />;
   if (isEmbedUrl(panoramaUrl)) return <EmbedViewer url={panoramaUrl} title={title} />;
   return <PannellumRenderer url={panoramaUrl} title={title} />;
 }
