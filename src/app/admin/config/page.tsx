@@ -95,6 +95,20 @@ export default function AdminConfigPage() {
     setUploading(false);
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+    const data = await res.json();
+    if (data.url) {
+      setProfile("avatar", data.url);
+    }
+    setUploading(false);
+  };
+
   const handleQrUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -178,14 +192,26 @@ export default function AdminConfigPage() {
           </div>
 
           <div>
-            <label className={labelClass}>头像 URL</label>
-            <input
-              type="text"
-              value={config.profile.avatar}
-              onChange={(e) => setProfile("avatar", e.target.value)}
-              placeholder="/avatar.jpg 或 https://..."
-              className={inputClass}
-            />
+            <label className={labelClass}>头像</label>
+            <div className="flex items-center gap-3">
+              <input
+                type="text"
+                value={config.profile.avatar}
+                onChange={(e) => setProfile("avatar", e.target.value)}
+                placeholder="/works/avatar.jpg 或 https://..."
+                className={inputClass}
+              />
+              <label className="shrink-0 px-3 py-2 text-xs text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer">
+                {uploading ? "上传中..." : "上传"}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                  disabled={uploading}
+                />
+              </label>
+            </div>
             {config.profile.avatar && (
               <img
                 src={config.profile.avatar}

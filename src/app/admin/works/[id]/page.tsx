@@ -202,6 +202,20 @@ export default function WorkEditorPage() {
     setUploading(false);
   };
 
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+    const data = await res.json() as { url: string; filename: string };
+    if (data.url) {
+      set("cover", data.url);
+    }
+    setUploading(false);
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     await handleUpload(e.target.files);
@@ -422,14 +436,26 @@ export default function WorkEditorPage() {
               />
             </div>
             <div>
-              <label className={labelClass}>封面图 URL</label>
-              <input
-                type="text"
-                value={form.cover}
-                onChange={(e) => set("cover", e.target.value)}
-                placeholder="https://... 或 /works/image.jpg"
-                className={inputClass}
-              />
+              <label className={labelClass}>封面图</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
+                  value={form.cover}
+                  onChange={(e) => set("cover", e.target.value)}
+                  placeholder="https://... 或 /works/image.jpg"
+                  className={inputClass}
+                />
+                <label className="shrink-0 px-3 py-2 text-xs text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer">
+                  {uploading ? "上传中..." : "上传"}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleCoverUpload}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                </label>
+              </div>
               {form.cover && (
                 <img
                   src={form.cover}
