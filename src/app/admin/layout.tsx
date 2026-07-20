@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 const navItems = [
   { href: "/admin", label: "作品管理" },
@@ -10,7 +10,28 @@ const navItems = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const isLoginPage = pathname === "/admin/login";
+
+  useEffect(() => {
+    if (isLoginPage) return;
+    fetch("/api/admin/auth/check").then((res) => {
+      if (!res.ok) {
+        router.replace("/admin/login");
+      }
+    });
+  }, [pathname, isLoginPage, router]);
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
+
+  async function handleLogout() {
+    await fetch("/api/admin/auth/logout", { method: "POST" });
+    router.replace("/admin/login");
+  }
 
   const isActive = (href: string) => {
     if (href === "/admin") return pathname === "/admin" || pathname.startsWith("/admin/works");
@@ -64,6 +85,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </svg>
           </button>
           <span className="text-sm font-semibold text-gray-900">管理后台</span>
+          <div className="ml-auto">
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              退出登录
+            </button>
+          </div>
         </header>
 
         <main className="flex-1 p-6 overflow-auto">

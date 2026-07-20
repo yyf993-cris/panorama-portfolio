@@ -1,25 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const LOCAL_IPS = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1", "localhost"]);
-
-function isLocalRequest(request: NextRequest): boolean {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    const ip = forwarded.split(",")[0].trim();
-    return LOCAL_IPS.has(ip);
-  }
-
-  const realIp = request.headers.get("x-real-ip");
-  if (realIp) {
-    return LOCAL_IPS.has(realIp);
-  }
-
-  return true;
-}
+const PUBLIC_PATHS = new Set(["/admin/login", "/api/admin/auth/login", "/api/admin/auth/reset-password"]);
 
 export function middleware(request: NextRequest) {
-  if (!isLocalRequest(request)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const { pathname } = request.nextUrl;
+
+  if (PUBLIC_PATHS.has(pathname)) {
+    return NextResponse.next();
+  }
+
+  const sessionToken = request.cookies.get("admin_session")?.value;
+  if (!sessionToken) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return NextResponse.redirect(new URL("/admin/login", request.url));
   }
 
   return NextResponse.next();

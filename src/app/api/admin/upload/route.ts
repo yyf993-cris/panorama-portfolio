@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "node:fs";
 import path from "node:path";
+import { requireAuth } from "@/lib/api-auth";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "works");
 
 export async function POST(request: NextRequest) {
+  const denied = requireAuth(request);
+  if (denied) return denied;
+
   let formData: FormData;
   try {
     formData = await request.formData();
@@ -33,6 +37,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const denied = requireAuth(request);
+  if (denied) return denied;
   const { filename } = await request.json();
 
   if (!filename || filename.includes("..") || filename.includes("/")) {

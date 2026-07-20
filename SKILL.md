@@ -38,6 +38,9 @@ panorama-portfolio/
 │   │   ├── config.ts            #   站点配置 + 个人信息（名字/简介/社交链接）
 │   │   ├── works-data.ts        #   作品数据（全景+套图统一数组，用户直接编辑）
 │   │   ├── types.ts             #   TypeScript 类型定义（Work/AlbumImage/Profile）
+│   │   ├── data.ts              #   文件系统 JSON 读写层
+│   │   ├── auth.ts              #   管理员认证（PBKDF2 密码哈希/会话/登录限制）
+│   │   ├── api-auth.ts          #   API 路由鉴权辅助（requireAuth guard）
 │   │   └── notion.ts            #   Notion API 封装（备用，当前未启用）
 │   │
 │   └── types/                   # 全局类型声明
@@ -100,6 +103,7 @@ panorama-portfolio/
 | 新增 npm 依赖 | `docs/deploy-guide.md`（环境要求） |
 | 修改 admin 功能 | `docs/user-guide.md` |
 | 修改 middleware 访问控制 | `docs/deploy-guide.md`（管理后台章节） |
+| 修改认证/会话逻辑 | `docs/deploy-guide.md` + `docs/user-guide.md`（登录章节） |
 | 修改 package.json scripts | `docs/deploy-guide.md` + `README.md` |
 
 ### ⚠️ 不可遗漏的文件
@@ -118,9 +122,17 @@ panorama-portfolio/
 ## 数据流
 
 ```
+用户访问 /admin → middleware 检查 admin_session cookie
+    ↓ 无 cookie → 重定向到 /admin/login
+    ↓ 有 cookie → 放行（API 层二次验证 session 有效性）
+
+用户登录 /admin/login → POST /api/admin/auth/login
+    ↓ 验证用户名+密码（PBKDF2）+ 每日5次错误限制
+    ↓ 成功 → 创建 session、设置 httpOnly cookie
+
 用户通过 admin 后台编辑作品/配置
     ↓
-API Route 写入 data/*.json
+API Route（requireAuth 守卫）写入 data/*.json
     ↓
 前台页面动态读取 JSON（force-dynamic，保存即生效）
     ↓
@@ -131,6 +143,9 @@ API Route 写入 data/*.json
 API Route 写入 public/works/
     ↓
 通过 rewrite 规则即时可访问（无需 rebuild）
+
+强制重置密码 → POST /api/admin/auth/reset-password（需 ADMIN_RESET_SECRET）
+    ↓ 更新密码哈希、清除登录锁定、注销所有会话
 ```
 
 ---

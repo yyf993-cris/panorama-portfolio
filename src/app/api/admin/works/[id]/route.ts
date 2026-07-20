@@ -1,19 +1,24 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getWorks, saveWorks } from "@/lib/data";
+import { requireAuth } from "@/lib/api-auth";
 import type { Work } from "@/lib/types";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
-export async function GET(_request: Request, context: RouteContext) {
+export async function GET(request: NextRequest, context: RouteContext) {
+  const denied = requireAuth(request);
+  if (denied) return denied;
   const { id } = await context.params;
   const work = getWorks().find((w) => w.id === id);
   if (!work) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(work);
 }
 
-export async function PUT(request: Request, context: RouteContext) {
+export async function PUT(request: NextRequest, context: RouteContext) {
+  const denied = requireAuth(request);
+  if (denied) return denied;
   const { id } = await context.params;
   const body = await request.json() as Partial<Work>;
   const works = getWorks();
@@ -28,7 +33,9 @@ export async function PUT(request: Request, context: RouteContext) {
   return NextResponse.json(works[index]);
 }
 
-export async function DELETE(_request: Request, context: RouteContext) {
+export async function DELETE(request: NextRequest, context: RouteContext) {
+  const denied = requireAuth(request);
+  if (denied) return denied;
   const { id } = await context.params;
   const works = getWorks();
   const filtered = works.filter((w) => w.id !== id);

@@ -1,12 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getWorks, saveWorks } from "@/lib/data";
+import { requireAuth } from "@/lib/api-auth";
 import type { Work } from "@/lib/types";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const denied = requireAuth(request);
+  if (denied) return denied;
   return NextResponse.json(getWorks());
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const denied = requireAuth(request);
+  if (denied) return denied;
   const body = await request.json() as Partial<Work>;
   const works = getWorks();
 

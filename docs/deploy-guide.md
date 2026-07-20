@@ -59,7 +59,7 @@ scripts\server.bat start
 
 启动后：
 - **前台网站**: http://localhost:3000
-- **管理后台**: http://localhost:3000/admin（仅本机可访问）
+- **管理后台**: http://localhost:3000/admin（需登录管理员账号）
 
 ---
 
@@ -203,7 +203,9 @@ nssm start PanoramaPortfolio
 data/
 ├── works.json      ← 作品数据（通过 admin 后台管理）
 ├── config.json     ← 站点配置（通过 admin 后台管理）
-└── views.json      ← 浏览量统计（自动累加）
+├── views.json      ← 浏览量统计（自动累加）
+├── admin.json      ← 管理员账号凭据（密码哈希 + 登录尝试计数，自动初始化）
+└── sessions.json   ← 登录会话令牌（自动管理）
 ```
 
 ### 修改内容后是否需要重启？
@@ -224,9 +226,42 @@ data/
 
 ## 管理后台
 
-- 地址：http://localhost:3000/admin
-- 访问限制：仅本机 IP（127.0.0.1 / ::1）可访问，外网请求返回 403
+- 地址：http://your-domain:3000/admin
+- 访问方式：需要使用管理员账号密码登录（支持远程访问）
+- 默认账号：`admin` / `admin123`（首次启动自动初始化）
+- 登录限制：同一天内密码错误 5 次后锁定，次日自动解锁
 - 功能：作品增删改查、图片上传/排序/删除、站点信息编辑
+
+### 环境变量配置
+
+部署前请复制 `.env.local.example` 为 `.env.local` 并配置：
+
+```bash
+cp .env.local.example .env.local
+```
+
+必须配置 `ADMIN_RESET_SECRET`（用于强制重置密码接口的认证密钥）：
+
+```
+ADMIN_RESET_SECRET=一个随机的强密钥字符串
+```
+
+### 强制重置管理员密码
+
+如果忘记密码或账号被锁定，可通过 API 强制重置（需要在服务器上执行）：
+
+```bash
+curl -X POST http://localhost:3000/api/admin/auth/reset-password \
+  -H "Content-Type: application/json" \
+  -d '{"secret": "你在.env.local中设置的ADMIN_RESET_SECRET", "newPassword": "新密码"}'
+```
+
+重置后所有已有会话将失效，需要用新密码重新登录。
+
+### 首次部署后建议
+
+1. 启动服务后立即访问 `/admin/login` 用默认密码登录
+2. 通过强制重置接口修改默认密码为安全密码（至少 6 位）
 
 ---
 
@@ -252,7 +287,7 @@ cloudflared tunnel --url http://localhost:3000
 会输出一个 `https://xxx.trycloudflare.com` 地址，发给对方即可访问。
 
 注意：
-- 外网用户无法访问 `/admin`（middleware 会拦截）
+- 外网用户访问 `/admin` 需要登录管理员账号
 - 需要保持电脑不休眠、网络不断开
 - 每次启动地址会变化
 
@@ -319,7 +354,9 @@ taskkill /PID <进程号> /F
 
 **Q: 外网无法访问 admin**
 
-这是预期行为。管理后台仅允许本机访问，外网请求返回 403 Forbidden。
+管理后台现已支持远程访问，需要用管理员账号密码登录。如果无法访问，请检查：
+1. 服务器防火墙是否开放了对应端口
+2. 如使用反向代理（nginx），确保正确转发 cookie
 
 **Q: Windows 下 `prebuild` 脚本报错**
 

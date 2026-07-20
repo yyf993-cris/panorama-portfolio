@@ -7,6 +7,7 @@ const EMBED_DOMAINS = [
   "vr.shinewonder.com",
   "720yun.com",
   "www.720yun.com",
+  "vr.justeasy.cn",
 ];
 
 function isEmbedUrl(url: string): boolean {
