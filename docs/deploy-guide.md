@@ -201,12 +201,19 @@ nssm start PanoramaPortfolio
 
 ```
 data/
-├── works.json      ← 作品数据（通过 admin 后台管理）
-├── config.json     ← 站点配置（通过 admin 后台管理）
-├── views.json      ← 浏览量统计（自动累加）
-├── admin.json      ← 管理员账号凭据（密码哈希 + 登录尝试计数，自动初始化）
-└── sessions.json   ← 登录会话令牌（自动管理）
+├── config.json.example ← 站点配置模板（git 跟踪，新部署时复制为 config.json）
+├── config.json         ← 站点配置（通过 admin 后台管理，git 忽略）
+├── works.json          ← 作品数据（通过 admin 后台管理，git 忽略）
+├── views.json          ← 浏览量统计（自动累加，git 忽略）
+├── admin.json          ← 管理员账号凭据（自动初始化，git 忽略）
+└── sessions.json       ← 登录会话令牌（自动管理，git 忽略）
 ```
+
+> **首次部署注意**：`data/config.json` 不在 git 中，需手动从模板复制：
+> ```bash
+> cp data/config.json.example data/config.json
+> ```
+> 之后通过管理后台修改的配置不会被 `git pull` 覆盖。
 
 ### 修改内容后是否需要重启？
 
