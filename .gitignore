@@ -47,6 +47,7 @@ yarn-error.log*
 # runtime data (views counter, works managed via admin)
 /data/views.json
 /data/works.json
+/data/config.json
 /data/admin.json
 /data/sessions.json
 
