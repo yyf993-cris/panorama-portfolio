@@ -171,3 +171,4 @@ requireAuth (api-auth.ts) → 在每个 admin API handler 内调用
 1. **改动前** — 查代码地图定位影响范围
 2. **改动中** — 只改必须改的，保持现有模式（JSON 存储、组件粒度、Tailwind、framer-motion），bugfix 不夹带 refactor
 3. **改动后** — 如果新增/删除/重命名了文件、修改了类型定义、增减了 API 路由、改变了组件依赖关系，必须在同一次提交中更新本 AGENTS.md 的代码地图
+4. **改动后** — 检查 `docs/deploy-guide.md` 和 `docs/user-guide.md`，如果代码改动影响了部署流程、命令、环境变量、数据目录结构、管理后台操作方式等，必须同步更新对应文档
