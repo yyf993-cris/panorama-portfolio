@@ -9,6 +9,7 @@ import { getConfig } from "@/lib/data";
 export async function generateMetadata(): Promise<Metadata> {
   const config = getConfig();
   return {
+    metadataBase: new URL(config.site.url || "https://localhost:3000"),
     title: config.site.title,
     description: config.site.description,
     openGraph: {
