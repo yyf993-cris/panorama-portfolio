@@ -7,6 +7,17 @@
 | Node.js | >= 18 | `node -v` |
 | npm | >= 9 | `npm -v` |
 | Git | 任意（可选） | `git --version` |
+| 内存 | >= 2GB（建议加 swap） | `free -h` |
+
+> **低配服务器（2GB 内存）注意**：`next build` 可能因内存不足而崩溃。项目已配置跳过 TypeScript 类型检查以降低内存占用，但仍建议添加 swap：
+>
+> ```bash
+> sudo fallocate -l 2G /swapfile
+> sudo chmod 600 /swapfile
+> sudo mkswap /swapfile
+> sudo swapon /swapfile
+> echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+> ```
 
 > **Windows 用户**：无需手动安装 Node.js，部署脚本会自动检测并下载。
 
