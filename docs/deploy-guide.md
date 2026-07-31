@@ -318,6 +318,31 @@ set PORT=80 && scripts\server.bat start
 
 建议配合 nginx / Caddy 反向代理 + HTTPS 证书使用。
 
+### nginx 反向代理配置示例
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name your-domain.com;
+
+    ssl_certificate     /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+
+    # 上传文件大小限制（默认 1m，管理后台上传图片需要调大）
+    client_max_body_size 100m;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+> **重要**：`client_max_body_size` 必须设置，否则上传大于 1MB 的图片会返回 `413 Request Entity Too Large`。
+
 ---
 
 ## 常见问题
