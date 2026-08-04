@@ -9,6 +9,36 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(getWorks());
 }
 
+export async function PUT(request: NextRequest) {
+  const denied = requireAuth(request);
+  if (denied) return denied;
+  const { ids } = await request.json() as { ids: string[] };
+
+  if (!Array.isArray(ids)) {
+    return NextResponse.json({ error: "ids must be an array" }, { status: 400 });
+  }
+
+  const works = getWorks();
+  const workMap = new Map(works.map((w) => [w.id, w]));
+  const reordered: Work[] = [];
+
+  for (const id of ids) {
+    const work = workMap.get(id);
+    if (work) {
+      reordered.push(work);
+      workMap.delete(id);
+    }
+  }
+
+  // Append any works not in the ids array (safety net)
+  for (const work of workMap.values()) {
+    reordered.push(work);
+  }
+
+  saveWorks(reordered);
+  return NextResponse.json({ success: true });
+}
+
 export async function POST(request: NextRequest) {
   const denied = requireAuth(request);
   if (denied) return denied;

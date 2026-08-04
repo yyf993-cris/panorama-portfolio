@@ -89,6 +89,7 @@ HeroLogo                 ← "use client"，GIF 用 img、其他用 next/image�
 | `/api/admin/auth/reset-password` | POST | env secret | 强制重置密码 `{ secret, newPassword }` |
 | `/api/admin/works` | GET | cookie | 获取所有作品 |
 | `/api/admin/works` | POST | cookie | 创建作品 |
+| `/api/admin/works` | PUT | cookie | 重排作品顺序 `{ ids: string[] }` |
 | `/api/admin/works/[id]` | GET | cookie | 获取单个作品 |
 | `/api/admin/works/[id]` | PUT | cookie | 更新作品 |
 | `/api/admin/works/[id]` | DELETE | cookie | 删除作品 |
