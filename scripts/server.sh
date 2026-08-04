@@ -89,7 +89,7 @@ do_start() {
 
   echo "[$APP_NAME] 启动生产服务 (端口: $PORT)..."
   cd "$APP_DIR"
-  PORT=$PORT nohup npm run start > "$LOG_FILE" 2>&1 &
+  PORT=$PORT nohup node node_modules/.bin/next start > "$LOG_FILE" 2>&1 &
   echo $! > "$PID_FILE"
   sleep 2
 
@@ -107,23 +107,31 @@ do_start() {
 
 do_stop() {
   if [ ! -f "$PID_FILE" ]; then
-    echo "[$APP_NAME] 服务未在运行"
-    return 0
+    echo "[$APP_NAME] 服务未在运行（无 PID 文件）"
+  else
+    PID=$(cat "$PID_FILE")
+    if kill -0 "$PID" 2>/dev/null; then
+      echo "[$APP_NAME] 停止服务 (PID: $PID)..."
+      kill -- -"$PID" 2>/dev/null || kill "$PID" 2>/dev/null
+      sleep 1
+      if kill -0 "$PID" 2>/dev/null; then
+        kill -9 -- -"$PID" 2>/dev/null || kill -9 "$PID" 2>/dev/null
+      fi
+    else
+      echo "[$APP_NAME] PID $PID 已不存在"
+    fi
+    rm -f "$PID_FILE"
   fi
 
-  PID=$(cat "$PID_FILE")
-  if kill -0 "$PID" 2>/dev/null; then
-    echo "[$APP_NAME] 停止服务 (PID: $PID)..."
-    kill "$PID"
+  # Kill any remaining process on the port
+  local remaining
+  remaining=$(lsof -ti :"$PORT" 2>/dev/null || true)
+  if [ -n "$remaining" ]; then
+    echo "[$APP_NAME] 清理残留进程 (端口 $PORT): $remaining"
+    echo "$remaining" | xargs kill -9 2>/dev/null || true
     sleep 1
-    if kill -0 "$PID" 2>/dev/null; then
-      kill -9 "$PID"
-    fi
-    echo "✓ 服务已停止"
-  else
-    echo "[$APP_NAME] 进程已不存在"
   fi
-  rm -f "$PID_FILE"
+  echo "✓ 服务已停止"
 }
 
 do_restart() {
