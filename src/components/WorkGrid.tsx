@@ -94,7 +94,7 @@ export default function WorkGrid({ works }: { works: Work[] }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3"
           >
             {filtered.map((work, i) => (
               <WorkCard key={work.id} work={work} index={i} viewCount={viewCounts[work.id]} />

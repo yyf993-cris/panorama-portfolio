@@ -38,9 +38,9 @@ export default function WorkCard({ work, index = 0, viewCount }: { work: Work; i
                 src={work.cover}
                 alt={work.title}
                 fill
-                quality={90}
+                quality={75}
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
               />
             ) : (
               <div className="flex h-full items-center justify-center bg-gradient-to-br from-indigo-950 via-zinc-900 to-violet-950">
@@ -70,8 +70,8 @@ export default function WorkCard({ work, index = 0, viewCount }: { work: Work; i
             )}
           </div>
 
-          <div className="p-4">
-            <h3 className="line-clamp-1 font-medium text-foreground">{work.title}</h3>
+          <div className="p-2.5 sm:p-4">
+            <h3 className="line-clamp-1 text-sm sm:text-base font-medium text-foreground">{work.title}</h3>
 
             {(work.location || (viewCount ?? work.views) > 0) && (
               <div className="mt-2 flex items-center gap-3 text-[11px] text-muted">
@@ -91,7 +91,7 @@ export default function WorkCard({ work, index = 0, viewCount }: { work: Work; i
             )}
 
             {work.tags.length > 0 ? (
-              <div className="mt-3 flex flex-wrap gap-1.5">
+              <div className="mt-2 hidden sm:flex flex-wrap gap-1.5">
                 {work.tags.slice(0, 3).map((tag) => (
                   <span
                     key={tag}
@@ -102,7 +102,7 @@ export default function WorkCard({ work, index = 0, viewCount }: { work: Work; i
                 ))}
               </div>
             ) : (
-              <div className="mt-3 h-5" />
+              <div className="mt-2 hidden sm:block h-5" />
             )}
           </div>
         </div>

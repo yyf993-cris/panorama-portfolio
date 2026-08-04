@@ -60,7 +60,7 @@ function EmbedViewer({ url, title }: { url: string; title: string }) {
   return (
     <div
       className="relative overflow-hidden rounded-xl border border-border"
-      style={{ height: "clamp(300px, 70vh, 800px)" }}
+      style={{ height: "clamp(250px, 60vh, 800px)" }}
     >
       {!loaded && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-zinc-900">
@@ -129,7 +129,7 @@ function PannellumRenderer({ url, title }: { url: string; title: string }) {
   return (
     <div
       className="relative overflow-hidden rounded-xl border border-border"
-      style={{ height: "clamp(300px, 70vh, 800px)" }}
+      style={{ height: "clamp(250px, 60vh, 800px)" }}
     >
       {isLoading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-zinc-900">
@@ -156,7 +156,7 @@ function ExternalViewer({ url, title }: { url: string; title: string }) {
   return (
     <div
       className="relative flex flex-col items-center justify-center gap-4 overflow-hidden rounded-xl border border-border bg-zinc-900"
-      style={{ height: "clamp(300px, 70vh, 800px)" }}
+      style={{ height: "clamp(250px, 60vh, 800px)" }}
     >
       <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-zinc-400" aria-hidden="true">
         <circle cx="12" cy="12" r="10" />

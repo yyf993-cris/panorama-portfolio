@@ -15,14 +15,14 @@ export default function Home() {
     <>
       <section className="relative">
         {heroLogo ? (
-          <div className="relative w-full" style={{ minHeight: "56vh" }}>
+          <div className="relative w-full min-h-[40vh] sm:min-h-[56vh]">
             <img
               src={heroLogo}
               alt=""
               className="absolute inset-0 h-full w-full object-cover"
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
-            <div className="relative flex min-h-[56vh] items-end pb-6 sm:pb-8">
+            <div className="relative flex min-h-[40vh] sm:min-h-[56vh] items-end pb-6 sm:pb-8">
               <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
                 <ProfileCard worksCount={works.length} />
               </div>

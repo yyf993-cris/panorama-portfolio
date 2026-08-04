@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { AlbumImage } from "@/lib/types";
 
@@ -80,6 +80,7 @@ function Lightbox({
   const image = images[index];
   const hasPrev = index > 0;
   const hasNext = index < images.length - 1;
+  const touchStartX = useRef(0);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -90,6 +91,18 @@ function Lightbox({
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [onClose, onPrev, onNext]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const diff = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) onPrev();
+      else onNext();
+    }
+  };
 
   return (
     <motion.div
@@ -107,6 +120,8 @@ function Lightbox({
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
         className="relative flex w-full max-w-5xl flex-col items-center"
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         <div className="mb-3 rounded-full bg-white/[0.08] px-3 py-1 text-xs text-zinc-400">
           {index + 1} / {images.length}
